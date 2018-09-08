@@ -7,7 +7,88 @@
 import LoaderWorker from "worker-loader?inline&fallback=false!./LoaderWorker";
 import Utils from "../core/Utils";
 
+import LiberPages from "../core/config/LiberPages.json";
 
+require("./static/images/cicada/0.jpg");
+require("./static/images/cicada/1.jpg");
+require("./static/images/cicada/2.jpg");
+require("./static/images/cicada/3.jpg");
+require("./static/images/cicada/4.jpg");
+require("./static/images/cicada/5.jpg");
+require("./static/images/cicada/6.jpg");
+require("./static/images/cicada/7.jpg");
+require("./static/images/cicada/8.jpg");
+require("./static/images/cicada/9.jpg");
+require("./static/images/cicada/10.jpg");
+require("./static/images/cicada/11.jpg");
+require("./static/images/cicada/12.jpg");
+require("./static/images/cicada/13.jpg");
+require("./static/images/cicada/14.jpg");
+require("./static/images/cicada/15.jpg");
+require("./static/images/cicada/16.jpg");
+require("./static/images/cicada/17.jpg");
+require("./static/images/cicada/18.jpg");
+require("./static/images/cicada/19.jpg");
+require("./static/images/cicada/20.jpg");
+require("./static/images/cicada/21.jpg");
+require("./static/images/cicada/22.jpg");
+require("./static/images/cicada/23.jpg");
+require("./static/images/cicada/24.jpg");
+require("./static/images/cicada/25.jpg");
+require("./static/images/cicada/26.jpg");
+require("./static/images/cicada/27.jpg");
+require("./static/images/cicada/28.jpg");
+require("./static/images/cicada/29.jpg");
+require("./static/images/cicada/30.jpg");
+require("./static/images/cicada/31.jpg");
+require("./static/images/cicada/32.jpg");
+require("./static/images/cicada/33.jpg");
+require("./static/images/cicada/34.jpg");
+require("./static/images/cicada/35.jpg");
+require("./static/images/cicada/36.jpg");
+require("./static/images/cicada/37.jpg");
+require("./static/images/cicada/38.jpg");
+require("./static/images/cicada/39.jpg");
+require("./static/images/cicada/40.jpg");
+require("./static/images/cicada/41.jpg");
+require("./static/images/cicada/42.jpg");
+require("./static/images/cicada/43.jpg");
+require("./static/images/cicada/44.jpg");
+require("./static/images/cicada/45.jpg");
+require("./static/images/cicada/46.jpg");
+require("./static/images/cicada/47.jpg");
+require("./static/images/cicada/48.jpg");
+require("./static/images/cicada/49.jpg");
+require("./static/images/cicada/50.jpg");
+require("./static/images/cicada/51.jpg");
+require("./static/images/cicada/52.jpg");
+require("./static/images/cicada/53.jpg");
+require("./static/images/cicada/54.jpg");
+require("./static/images/cicada/55.jpg");
+require("./static/images/cicada/56.jpg");
+require("./static/images/cicada/57.jpg");
+
+require("./static/images/cicada/LP1_0.jpg");
+require("./static/images/cicada/LP1_1.jpg");
+require("./static/images/cicada/LP1_2.jpg");
+require("./static/images/cicada/LP1_3.jpg");
+require("./static/images/cicada/LP1_4.jpg");
+require("./static/images/cicada/LP1_5.jpg");
+require("./static/images/cicada/LP1_6.jpg");
+require("./static/images/cicada/LP1_7.jpg");
+require("./static/images/cicada/LP1_8.jpg");
+require("./static/images/cicada/LP1_9.jpg");
+require("./static/images/cicada/LP1_10.jpg");
+require("./static/images/cicada/LP1_11.jpg");
+require("./static/images/cicada/LP1_12.jpg");
+require("./static/images/cicada/LP1_13.jpg");
+require("./static/images/cicada/LP1_14.jpg");
+require("./static/images/cicada/LP1_15.jpg");
+require("./static/images/cicada/LP1_16.jpg");
+
+require("./static/images/cicada/gematria.jpg");
+require("./static/images/cicada/3301.jpg");
+require("./static/images/cicada/1033.jpg");
 /**
  * Waiter to handle events related to the input.
  */
@@ -64,7 +145,7 @@ class InputWaiter {
      *
      * @fires Manager#statechange
      */
-    set(input, silent=false) {
+    set(input, silent = false) {
         const inputText = document.getElementById("input-text");
         if (input instanceof File) {
             this.setFile(input);
@@ -178,7 +259,9 @@ class InputWaiter {
 
             this.loaderWorker = new LoaderWorker();
             this.loaderWorker.addEventListener("message", this.handleLoaderMessage.bind(this));
-            this.loaderWorker.postMessage({"file": file});
+            this.loaderWorker.postMessage({
+                "file": file
+            });
             this.set(file);
             return false;
         }
@@ -246,7 +329,9 @@ class InputWaiter {
             this.closeFile();
             this.loaderWorker = new LoaderWorker();
             this.loaderWorker.addEventListener("message", this.handleLoaderMessage.bind(this));
-            this.loaderWorker.postMessage({"file": file});
+            this.loaderWorker.postMessage({
+                "file": file
+            });
             this.set(file);
         }
     }
@@ -324,6 +409,78 @@ class InputWaiter {
         document.getElementById("output-selection-info").innerHTML = "";
         window.dispatchEvent(this.manager.statechange);
     }
+
+    loadLiberPrimusText(inp) {
+    const filename = window.prompt("Enter a page number or a range of numbers to load LP text into CyberChef(or 100-116 for LP1):", "57");
+    if (filename) {
+        document.getElementById("input-text").value = "";
+        let filenames = filename.split(",");
+        let ranges = [];
+        let findRanges = filenames.filter(function(filename){
+            return filename.indexOf("-") > -1;//find anything that is a range of values
+        });
+        ranges = ranges.concat(findRanges);
+        if (ranges.length > 0){
+            ranges.forEach(function(range){
+                filenames.splice(filenames.indexOf(range), 1); // remove the range from the complete list of filenames
+                let bounds = range.split("-");
+                let lowerbound = bounds[0];
+                let upperbound = bounds[1];
+                for (let i = lowerbound; i <= upperbound; i++){
+                    filenames.push("" + i);//push all appropriate pages
+                }
+            });
+        }
+        filenames.sort();
+
+        for (let i = 0; i <  filenames.length; i++) {
+            let pageNumber = "" + filenames[i];
+            if (LiberPages[pageNumber]){
+                let cipherArray = LiberPages[pageNumber].ciphertext;
+                let cipherText = "";
+                cipherArray.forEach(function(sentence){
+                    sentence.forEach(function(line){
+                        cipherText += line + "\n";
+                    });
+                    cipherText += " ";
+                });
+                document.getElementById("input-text").value += cipherText + "\n";
+            } else {
+                document.getElementById("input-text").value = "Invalid page number entered.";
+            }
+        }
+    }}
+
+    openLiberPrimusImage(inp) {
+        const filename = window.prompt("Enter a page number or a range of numbers(0-57) to view LP images.\n\nLP1_0 - LP1_16 for First 16 Pages\n3301 for the 2016 message\ngematria for Gematria Primus\nDisable popup blocker.", "0-2,LP1_0");
+        if (filename) {
+            let filenames = filename.split(",");
+            let ranges = [];
+            let findRanges = filenames.filter(function(filename) {
+                return filename.indexOf("-") > -1; //find anything that is a range of values
+            });
+            ranges = ranges.concat(findRanges);
+            if (ranges.length > 0) {
+                ranges.forEach(function(range) {
+                    filenames.splice(filenames.indexOf(range), 1); // remove the range from the complete list of filenames
+                    let bounds = range.split("-");
+                    let lowerbound = bounds[0];
+                    let upperbound = bounds[1];
+                    for (let i = lowerbound; i <= upperbound; i++) {
+                        filenames.push("" + i); //push all appropriate pages
+                    }
+                });
+            }
+            filenames.sort();
+
+
+            for (let i = 0; i < filenames.length; i++) {
+                let pageNumber = "" + filenames[i];
+                window.open("images/" + pageNumber + ".jpg");
+            }
+        }
+    }
+
 
 }
 

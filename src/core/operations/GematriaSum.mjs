@@ -6,6 +6,7 @@
 
 import Operation from "../Operation";
 import OperationError from "../errors/OperationError";
+import Gematria from "../config/Gematria.json";
 
 /**
  * gematriaSum operation
@@ -24,21 +25,89 @@ class GematriaSum extends Operation {
         this.infoURL = "http://uncovering-cicada.wikia.com/wiki/Gematria_Primus";
         this.inputType = "string";
         this.outputType = "string";
-        this.args = [
-            /* Example arguments. See the project wiki for full details.
-            {
-                name: "First arg",
-                type: "string",
-                value: "Don't Panic"
-            },
-            {
-                name: "Second arg",
-                type: "number",
-                value: 42
-            }
-            */
-        ];
+        this.args = [];
     }
+
+    _lookup(input, outputFormat) {
+
+        let returnVal = input;
+        if (Gematria[input]) {
+            returnVal = Gematria[input][outputFormat];
+        }
+        return returnVal;
+    }
+
+    _massageText(input, spaceDelimiter) {
+        input = input.toUpperCase();
+        input = input.replace(/v/gi, "U");
+        input = input.replace(/q/gi, "CU");
+        input = input.replace(new RegExp(/[.\.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/, "g"), " $& ");
+        input = input.replace(new RegExp(" {2}", "g"), " ");
+
+        return input;
+
+    }
+
+    //Takes an english word as input, generates the gematria sum as the output
+    _englishToGematriaSum(word) {
+        var re = new RegExp('[a-zA-Z]');
+        if (word.match(re)) {
+            let outputFormat = "prime";
+            let branchLetters = ["T", "E", "O", "I", "N", "A"];
+            let doubleLetters = ["TH", "EA", "AE", "EO", "OE", "IA", "IO", "NG"];
+            let sum = 0;
+            for (let i = 0; i < word.length; i++) {
+                let returnVal = "";
+                let letter = word[i];
+                if (branchLetters.indexOf(letter) !== -1) { //Consider looking at the next letters
+                    if (i + 3 <= word.length) { //ING
+                        let threegram = word.substring(i, i + 3);
+                        let twogram = word.substring(i, i + 2);
+                        if (threegram === "ING") {
+                            returnVal += this._lookup(threegram, outputFormat);
+                            i += 2;
+                        } else if (doubleLetters.indexOf(twogram) !== -1) {
+                            returnVal += this._lookup(twogram, outputFormat);
+                            i += 1;
+                        } else {
+                            returnVal += this._lookup(letter, outputFormat);
+                        }
+                    } else if (i + 2 <= word.length) {
+                        let twogram = word.substring(i, i + 2);
+                        if (doubleLetters.indexOf(twogram) !== -1) {
+                            returnVal += this._lookup(twogram, outputFormat);
+                            i += 1;
+                        } else {
+                            returnVal += this._lookup(letter, outputFormat);
+                        }
+                    } else {
+                        returnVal += this._lookup(letter, outputFormat);
+                    }
+                } else {
+                    returnVal += this._lookup(letter, outputFormat);
+                }
+                sum += parseInt(returnVal);
+            }
+            return sum;
+        }
+        return word; //if not letters, just return it
+    }
+    _sumGematriaWords(input) {
+        let returnVal = "";
+        input = this._massageText(input, "SPACE");
+        let words = input.split(" ");
+        let outputWords = [];
+        let self = this;
+        words.forEach(function(word) {
+            if (word !== "") {
+                let gematriaSum = self._englishToGematriaSum(word);
+                outputWords.push(gematriaSum);
+            }
+        });
+        returnVal = outputWords.join(" ");
+        return returnVal;
+    }
+
 
     /**
      * @param {string} input
@@ -47,7 +116,10 @@ class GematriaSum extends Operation {
      */
     run(input, args) {
         // const [firstArg, secondArg] = args;
-
+        let returnVal = "";
+      //  console.log(JSON.stringify(Gematria));
+        returnVal = this._sumGematriaWords(input);
+        return returnVal;
         throw new OperationError("Test");
     }
 

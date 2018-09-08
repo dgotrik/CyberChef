@@ -143,6 +143,10 @@ class Manager {
         this.addMultiEventListener("#input-text", "paste", this.input.inputPaste, this.input);
         document.getElementById("reset-layout").addEventListener("click", this.app.resetLayout.bind(this.app));
         document.getElementById("clr-io").addEventListener("click", this.input.clearIoClick.bind(this.input));
+        document.getElementById("open-lp").addEventListener("click", this.input.openLiberPrimusImage.bind(this.input));
+        document.getElementById("load-lp").addEventListener("click", this.input.loadLiberPrimusText.bind(this.input));
+
+
         this.addListeners("#input-text,#input-file", "dragover", this.input.inputDragover, this.input);
         this.addListeners("#input-text,#input-file", "dragleave", this.input.inputDragleave, this.input);
         this.addListeners("#input-text,#input-file", "drop", this.input.inputDrop, this.input);

@@ -6,15 +6,132 @@
 
 import utf8 from "utf8";
 import moment from "moment-timezone";
-import {fromBase64} from "./lib/Base64";
-import {fromHex} from "./lib/Hex";
-import {fromDecimal} from "./lib/Decimal";
+import Gematria from "./config/Gematria.json";
+
+import {
+    fromBase64
+} from "./lib/Base64";
+import {
+    fromHex
+} from "./lib/Hex";
+import {
+    fromDecimal
+} from "./lib/Decimal";
 
 
 /**
  * Utility functions for use in operations, the core framework and the stage.
  */
 class Utils {
+
+  /* Operations for transliteration */
+
+  static _lookup(input, outputFormat) {
+      let returnVal = input;
+      if (Gematria[input]) {
+          returnVal = Gematria[input][outputFormat];
+      }
+      return returnVal;
+  }
+
+  static _isValid(input) {
+      let isValid = false;
+      if (Gematria[input]) {
+          isValid = true;
+      }
+      return isValid;
+  }
+
+  static _massageText(input, spaceDelimiter) {
+      //       input = input.replace(new RegExp(spaceDelimiter, "g"), " "+spaceDelimiter+" ");
+      input = input.toUpperCase(); //convert to UPPERCASE
+
+      input = input.replace(/v/gi, "U"); //replace V with U
+      input = input.replace(/q/gi, "CU");//replace Q with CU
+
+      input = input.replace(new RegExp(/[.\.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/, "g"), " $& ");
+      input = input.replace(new RegExp(" {2}", "g"), " ");
+
+      return input;
+
+  }
+  //Start recursing, every step check if we branch or take single letter
+  //First - need to look 2 letters ahead for ING
+  //Second - need to look 1 letter ahead for TH EA EO OE IA IO NG
+  //Third - take single english letter and convert to gematria
+  static _parseEnglishWord(word, outputFormat) {
+      let branchLetters = ["T", "E", "O", "I", "N", "A"];
+      let doubleLetters = ["TH", "EA", "EO", "AE", "OE", "IA", "IO", "NG"];
+      let returnVal = "";
+      for (let i = 0; i < word.length; i++) {
+          let letter = word[i];
+          if (branchLetters.indexOf(letter) !== -1) { //Consider looking at the next letters
+              if (i + 3 <= word.length) { //ING
+                  let threegram = word.substring(i, i + 3);
+                  let twogram = word.substring(i, i + 2);
+                  if (threegram === "ING") {
+                      returnVal += this._lookup(threegram, outputFormat);
+                      i += 2;
+                  } else if (doubleLetters.indexOf(twogram) !== -1) {
+                      returnVal += this._lookup(twogram, outputFormat);
+                      i += 1;
+                  } else {
+                      returnVal +=this. _lookup(letter, outputFormat);
+                  }
+              } else if (i + 2 <= word.length) {
+                  let twogram = word.substring(i, i + 2);
+                  if (doubleLetters.indexOf(twogram) !== -1) {
+                      returnVal += this._lookup(twogram, outputFormat);
+                      i += 1;
+                  } else {
+                      returnVal += this._lookup(letter, outputFormat);
+                  }
+              } else {
+                  returnVal += this._lookup(letter, outputFormat);
+              }
+          } else {
+              returnVal += this._lookup(letter, outputFormat);
+          }
+          if (outputFormat === "index") {
+              returnVal += " ";
+          }
+      }
+      return returnVal;
+  }
+
+    static LPformat(token) {
+        let formats = {
+            "English": "letter",
+            "Index": "index",
+            "Prime": "prime",
+            "Runic": "rune"
+        }
+        console.log(token);
+        console.log(formats[token]);
+        return formats[token];
+    }
+
+    static spaceDelimiter(token) {
+        let spaces = {
+            "SPACE": " ",
+            "DASH(-)": "-",
+            "PERIOD(.)": "\.",
+            "COMMA(,)": "\,",
+            "none": ""
+        };
+        return spaces[token];
+    }
+
+    static LPoperation(token) {
+        let operations= {
+            "Add": "_add",
+            "Subtract": "_sub"
+        };
+        return operations[token];
+    }
+
+
+
 
     /**
      * Translates an ordinal into a character.
@@ -91,7 +208,7 @@ class Utils {
      * // returns ["t", "e", "s", "t", 1, 1, 1, 1]
      * Utils.padBytesRight("test", 8, 1);
      */
-    static padBytesRight(arr, numBytes, padByte=0) {
+    static padBytesRight(arr, numBytes, padByte = 0) {
         const paddedBytes = new Array(numBytes);
         paddedBytes.fill(padByte);
 
@@ -118,7 +235,7 @@ class Utils {
      * // returns "A long s-"
      * Utils.truncate("A long string", 9, "-");
      */
-    static truncate(str, max, suffix="...") {
+    static truncate(str, max, suffix = "...") {
         if (str.length > max) {
             str = str.slice(0, max - suffix.length) + suffix;
         }
@@ -140,7 +257,7 @@ class Utils {
      * // returns "6e"
      * Utils.hex(110);
      */
-    static hex(c, length=2) {
+    static hex(c, length = 2) {
         c = typeof c == "string" ? Utils.ord(c) : c;
         return c.toString(16).padStart(length, "0");
     }
@@ -160,7 +277,7 @@ class Utils {
      * // returns "01101110"
      * Utils.bin(110);
      */
-    static bin(c, length=8) {
+    static bin(c, length = 8) {
         c = typeof c == "string" ? Utils.ord(c) : c;
         return c.toString(2).padStart(length, "0");
     }
@@ -173,7 +290,7 @@ class Utils {
      * @param {boolean} [preserveWs=false] - Whether or not to print whitespace.
      * @returns {string}
      */
-    static printable(str, preserveWs=false) {
+    static printable(str, preserveWs = false) {
         if (ENVIRONMENT_IS_WEB() && window.app && !window.app.options.treatAsUtf8) {
             str = Utils.byteArrayToChars(Utils.strToByteArray(str));
         }
@@ -202,7 +319,7 @@ class Utils {
      */
     static parseEscapedChars(str) {
         return str.replace(/(\\)?\\([bfnrtv0'"]|x[\da-fA-F]{2}|u[\da-fA-F]{4}|u\{[\da-fA-F]{1,6}\})/g, function(m, a, b) {
-            if (a === "\\") return "\\"+b;
+            if (a === "\\") return "\\" + b;
             switch (b[0]) {
                 case "0":
                     return "\0";
@@ -271,10 +388,10 @@ class Utils {
 
         for (let i = 0; i < alphStr.length; i++) {
             if (i < alphStr.length - 2 &&
-                alphStr[i+1] === "-" &&
+                alphStr[i + 1] === "-" &&
                 alphStr[i] !== "\\") {
                 const start = Utils.ord(alphStr[i]),
-                    end = Utils.ord(alphStr[i+2]);
+                    end = Utils.ord(alphStr[i + 2]);
 
                 for (let j = start; j <= end; j++) {
                     alphArr.push(Utils.chr(j));
@@ -282,7 +399,7 @@ class Utils {
                 i += 2;
             } else if (i < alphStr.length - 2 &&
                 alphStr[i] === "\\" &&
-                alphStr[i+1] === "-") {
+                alphStr[i + 1] === "-") {
                 alphArr.push("-");
                 i++;
             } else {
@@ -379,7 +496,8 @@ class Utils {
      */
     static strToByteArray(str) {
         const byteArray = new Array(str.length);
-        let i = str.length, b;
+        let i = str.length,
+            b;
         while (i--) {
             b = str.charCodeAt(i);
             byteArray[i] = b;
@@ -519,7 +637,7 @@ class Utils {
      * // returns "hello"
      * Utils.arrayBufferToStr(Uint8Array.from([104,101,108,108,111]).buffer);
      */
-    static arrayBufferToStr(arrayBuffer, utf8=true) {
+    static arrayBufferToStr(arrayBuffer, utf8 = true) {
         const byteArray = Array.prototype.slice.call(new Uint8Array(arrayBuffer));
         return utf8 ? Utils.byteArrayToUtf8(byteArray) : Utils.byteArrayToChars(byteArray);
     }
@@ -537,7 +655,7 @@ class Utils {
      * // returns [["head1", "head2"], ["data1", "data2"]]
      * Utils.parseCSV("head1,head2\ndata1,data2");
      */
-    static parseCSV(data, cellDelims=[","], lineDelims=["\n", "\r"]) {
+    static parseCSV(data, cellDelims = [","], lineDelims = ["\n", "\r"]) {
         let b,
             next,
             renderNext = false,
@@ -551,7 +669,7 @@ class Utils {
 
         for (let i = 0; i < data.length; i++) {
             b = data[i];
-            next = data[i+1] || "";
+            next = data[i + 1] || "";
             if (renderNext) {
                 cell += b;
                 renderNext = false;
@@ -596,7 +714,7 @@ class Utils {
      * // returns "Test"
      * Utils.stripHtmlTags("<div>Test</div>");
      */
-    static stripHtmlTags(htmlStr, removeScriptAndStyle=false) {
+    static stripHtmlTags(htmlStr, removeScriptAndStyle = false) {
         if (removeScriptAndStyle) {
             htmlStr = htmlStr.replace(/<(script|style)[^>]*>.*<\/(script|style)>/gmi, "");
         }
@@ -626,7 +744,7 @@ class Utils {
             "`": "&#x60;"
         };
 
-        return str.replace(/[&<>"'/`]/g, function (match) {
+        return str.replace(/[&<>"'/`]/g, function(match) {
             return HTML_CHARS[match];
         });
     }
@@ -644,16 +762,16 @@ class Utils {
      */
     static unescapeHtml(str) {
         const HTML_CHARS = {
-            "&amp;":  "&",
-            "&lt;":   "<",
-            "&gt;":   ">",
+            "&amp;": "&",
+            "&lt;": "<",
+            "&gt;": ">",
             "&quot;": '"',
             "&#x27;": "'",
             "&#x2F;": "/",
             "&#x60;": "`"
         };
 
-        return str.replace(/&#?x?[a-z0-9]{2,4};/ig, function (match) {
+        return str.replace(/&#?x?[a-z0-9]{2,4};/ig, function(match) {
             return HTML_CHARS[match] || match;
         });
     }
@@ -705,7 +823,7 @@ class Utils {
         };
         str = encodeURIComponent(str);
 
-        return str.replace(/%[0-9A-F]{2}/g, function (match) {
+        return str.replace(/%[0-9A-F]{2}/g, function(match) {
             return LEGAL_CHARS[match] || match;
         });
     }
@@ -742,7 +860,7 @@ class Utils {
                 .replace(/"((?:[^"\\]|\\.)*)"/g, "'$1'") // Replace opening and closing " with '
                 .replace(/\\"/g, '"'); // Unescape double quotes
 
-            disabled = op.disabled ? "/disabled": "";
+            disabled = op.disabled ? "/disabled" : "";
             bp = op.breakpoint ? "/breakpoint" : "";
             prettyConfig += `${name}(${args}${disabled}${bp})`;
             if (newline) prettyConfig += "\n";
@@ -846,8 +964,9 @@ class Utils {
         const formatFile = async function(file, i) {
             const buff = await Utils.readFile(file);
             const blob = new Blob(
-                [buff],
-                {type: "octet/stream"}
+                [buff], {
+                    type: "octet/stream"
+                }
             );
 
             const html = `<div class='card' style='white-space: normal;'>
@@ -1027,19 +1146,19 @@ class Utils {
      */
     static charRep(token) {
         return {
-            "Space":         " ",
-            "Comma":         ",",
-            "Semi-colon":    ";",
-            "Colon":         ":",
-            "Line feed":     "\n",
-            "CRLF":          "\r\n",
+            "Space": " ",
+            "Comma": ",",
+            "Semi-colon": ";",
+            "Colon": ":",
+            "Line feed": "\n",
+            "CRLF": "\r\n",
             "Forward slash": "/",
-            "Backslash":     "\\",
-            "0x":            "0x",
-            "\\x":           "\\x",
+            "Backslash": "\\",
+            "0x": "0x",
+            "\\x": "\\x",
             "Nothing (separate chars)": "",
-            "None":          "",
-        }[token];
+            "None": "",
+        } [token];
     }
 
 
@@ -1051,18 +1170,18 @@ class Utils {
      */
     static regexRep(token) {
         return {
-            "Space":         /\s+/g,
-            "Comma":         /,/g,
-            "Semi-colon":    /;/g,
-            "Colon":         /:/g,
-            "Line feed":     /\n/g,
-            "CRLF":          /\r\n/g,
+            "Space": /\s+/g,
+            "Comma": /,/g,
+            "Semi-colon": /;/g,
+            "Colon": /:/g,
+            "Line feed": /\n/g,
+            "CRLF": /\r\n/g,
             "Forward slash": /\//g,
-            "Backslash":     /\\/g,
-            "0x":            /0x/g,
-            "\\x":           /\\x/g,
-            "None":          /\s+/g // Included here to remove whitespace when there shouldn't be any
-        }[token];
+            "Backslash": /\\/g,
+            "0x": /0x/g,
+            "\\x": /\\x/g,
+            "None": /\s+/g // Included here to remove whitespace when there shouldn't be any
+        } [token];
     }
 
 }
@@ -1083,7 +1202,8 @@ export default Utils;
  * ["One", "Two", "Three", "One"].unique();
  */
 Array.prototype.unique = function() {
-    const u = {}, a = [];
+    const u = {},
+        a = [];
     for (let i = 0, l = this.length; i < l; i++) {
         if (u.hasOwnProperty(this[i])) {
             continue;
@@ -1133,7 +1253,7 @@ Array.prototype.min = function() {
  * [4,2,5,3,7].sum();
  */
 Array.prototype.sum = function() {
-    return this.reduce(function (a, b) {
+    return this.reduce(function(a, b) {
         return a + b;
     }, 0);
 };
@@ -1186,14 +1306,14 @@ String.prototype.count = function(chr) {
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
 if (!String.prototype.padStart) {
     String.prototype.padStart = function padStart(targetLength, padString) {
-        targetLength = targetLength>>0; //floor if number or convert non-number to 0;
+        targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
         padString = String((typeof padString !== "undefined" ? padString : " "));
         if (this.length > targetLength) {
             return String(this);
         } else {
-            targetLength = targetLength-this.length;
+            targetLength = targetLength - this.length;
             if (targetLength > padString.length) {
-                padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
+                padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
             }
             return padString.slice(0, targetLength) + String(this);
         }
@@ -1205,14 +1325,14 @@ if (!String.prototype.padStart) {
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padEnd
 if (!String.prototype.padEnd) {
     String.prototype.padEnd = function padEnd(targetLength, padString) {
-        targetLength = targetLength>>0; //floor if number or convert non-number to 0;
+        targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
         padString = String((typeof padString !== "undefined" ? padString : " "));
         if (this.length > targetLength) {
             return String(this);
         } else {
-            targetLength = targetLength-this.length;
+            targetLength = targetLength - this.length;
             if (targetLength > padString.length) {
-                padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
+                padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
             }
             return String(this) + padString.slice(0, targetLength);
         }

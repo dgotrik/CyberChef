@@ -5,10 +5,10 @@
     },    {
         "name": "Liber Primus",
         "ops":[
+          "Add or Subtract Key",
             "Gematria Sum",
-            "Add or Subtract Key",
-            "English Text To Gematria Sum",
-            "Frequency Analysis"
+            "Gematria Atbash",
+            "Text Transliteration"
         ]
     },
     {
