@@ -24,80 +24,206 @@ import {
  */
 class Utils {
 
-  /* Operations for transliteration */
+    /* Operations for Cicada 3301 */
 
-  static _lookup(input, outputFormat) {
-      let returnVal = input;
-      if (Gematria[input]) {
-          returnVal = Gematria[input][outputFormat];
-      }
-      return returnVal;
-  }
+    static _mod(n, m) {
+        return ((n % m) + m) % m;
+    }
 
-  static _isValid(input) {
-      let isValid = false;
-      if (Gematria[input]) {
-          isValid = true;
-      }
-      return isValid;
-  }
+    static _add(a, b) {
+        return a + b;
+    }
 
-  static _massageText(input, spaceDelimiter) {
-      //       input = input.replace(new RegExp(spaceDelimiter, "g"), " "+spaceDelimiter+" ");
-      input = input.toUpperCase(); //convert to UPPERCASE
+    static _sub(a, b) {
+        return a - b;
+    }
 
-      input = input.replace(/v/gi, "U"); //replace V with U
-      input = input.replace(/q/gi, "CU");//replace Q with CU
+    static _lookup(input, outputFormat) {
+        let returnVal = input;
+        if (Gematria[input]) {
+            returnVal = Gematria[input][outputFormat];
+        }
+        return returnVal;
+    }
 
-      input = input.replace(new RegExp(/[.\.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/, "g"), " $& ");
-      input = input.replace(new RegExp(" {2}", "g"), " ");
+    static _isValid(input) {
+        let isValid = false;
+        if (Gematria[input]) {
+            isValid = true;
+        }
+        return isValid;
+    }
 
-      return input;
+    static _without(array, what) {
+        return array.filter(function(element) {
+            return element !== what;
+        });
+    }
 
-  }
-  //Start recursing, every step check if we branch or take single letter
-  //First - need to look 2 letters ahead for ING
-  //Second - need to look 1 letter ahead for TH EA EO OE IA IO NG
-  //Third - take single english letter and convert to gematria
-  static _parseEnglishWord(word, outputFormat) {
-      let branchLetters = ["T", "E", "O", "I", "N", "A"];
-      let doubleLetters = ["TH", "EA", "EO", "AE", "OE", "IA", "IO", "NG"];
-      let returnVal = "";
-      for (let i = 0; i < word.length; i++) {
-          let letter = word[i];
-          if (branchLetters.indexOf(letter) !== -1) { //Consider looking at the next letters
-              if (i + 3 <= word.length) { //ING
-                  let threegram = word.substring(i, i + 3);
-                  let twogram = word.substring(i, i + 2);
-                  if (threegram === "ING") {
-                      returnVal += this._lookup(threegram, outputFormat);
-                      i += 2;
-                  } else if (doubleLetters.indexOf(twogram) !== -1) {
-                      returnVal += this._lookup(twogram, outputFormat);
-                      i += 1;
-                  } else {
-                      returnVal +=this. _lookup(letter, outputFormat);
-                  }
-              } else if (i + 2 <= word.length) {
-                  let twogram = word.substring(i, i + 2);
-                  if (doubleLetters.indexOf(twogram) !== -1) {
-                      returnVal += this._lookup(twogram, outputFormat);
-                      i += 1;
-                  } else {
-                      returnVal += this._lookup(letter, outputFormat);
-                  }
-              } else {
-                  returnVal += this._lookup(letter, outputFormat);
-              }
-          } else {
-              returnVal += this._lookup(letter, outputFormat);
-          }
-          if (outputFormat === "index") {
-              returnVal += " ";
-          }
-      }
-      return returnVal;
-  }
+    static replaceAll(str, search, replacement){
+      return str.replace(new RegExp(search, 'g'), replacement);
+    }
+    //Start recursing, every step check if we branch or take single letter
+    //First - need to look 2 letters ahead for ING
+    //Second - need to look 1 letter ahead for TH EA EO OE IA IO NG
+    //Third - take single english letter and convert to gematria
+    static _parseEnglishWord(word, outputFormat) {
+        let branchLetters = ["T", "E", "O", "I", "N", "A"];
+        let doubleLetters = ["TH", "EA", "EO", "AE", "OE", "IA", "IO", "NG"];
+        let returnVal = "";
+        for (let i = 0; i < word.length; i++) {
+            let letter = word[i];
+            if (branchLetters.indexOf(letter) !== -1) { //Consider looking at the next letters
+                if (i + 3 <= word.length) { //ING
+                    let threegram = word.substring(i, i + 3);
+                    let twogram = word.substring(i, i + 2);
+                    if (threegram === "ING") {
+                        returnVal += this._lookup(threegram, outputFormat);
+                        i += 2;
+                    } else if (doubleLetters.indexOf(twogram) !== -1) {
+                        returnVal += this._lookup(twogram, outputFormat);
+                        i += 1;
+                    } else {
+                        returnVal += this._lookup(letter, outputFormat);
+                    }
+                } else if (i + 2 <= word.length) {
+                    let twogram = word.substring(i, i + 2);
+                    if (doubleLetters.indexOf(twogram) !== -1) {
+                        returnVal += this._lookup(twogram, outputFormat);
+                        i += 1;
+                    } else {
+                        returnVal += this._lookup(letter, outputFormat);
+                    }
+                } else {
+                    returnVal += this._lookup(letter, outputFormat);
+                }
+            } else {
+                returnVal += this._lookup(letter, outputFormat);
+            }
+            if (outputFormat === "index") {
+                returnVal += " ";
+            }
+        }
+        return returnVal;
+    }
+    static _convertEnglish(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
+        let returnVal = "";
+        input = this._massageText(input, inputSpaceDelimiter);
+        let words = input.split(inputSpaceDelimiter);
+        let outputWords = [];
+        let self = this;
+        words.forEach(function(word) {
+            if (word !== "") {
+                outputWords.push(self._parseEnglishWord(word, outputFormat));
+            }
+        });
+
+        returnVal = outputWords.join(outputSpaceDelimiter);
+        if (outputFormat === "index") { //format the numbers correctly
+            // returnVal = this._massageText(returnVal, outputSpaceDelimiter);;
+            returnVal = returnVal.replace(new RegExp(outputSpaceDelimiter, "g"), " " + outputSpaceDelimiter + " ");
+            returnVal = returnVal.replace(new RegExp(" {2}", "g"), " "); //replace double spaces with single
+        }
+        return returnVal;
+    }
+
+    static _convertPrime(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
+        let returnVal = "";
+        if (outputFormat === "prime") {
+            return input;
+        }
+        input = this._massageText(input, inputSpaceDelimiter);
+        let indices = input.split(" ");
+        // input = input.replace(new RegExp(inputSpaceDelimiter, "g"), " "+inputSpaceDelimiter+" ");
+        // input = input.replace(new RegExp(" {2}", "g"), " ");
+        // let indices = input.split(/[.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/);
+        indices.forEach(function(entry) {
+            let lookup = this._lookup(entry, outputFormat);
+            if (entry === inputSpaceDelimiter || lookup === "29") {
+                returnVal += outputSpaceDelimiter;
+            } else if (lookup === "") {
+                returnVal += entry;
+            } else {
+                returnVal += lookup;
+            }
+            if (outputFormat === "index") {
+                returnVal += " ";
+            }
+        });
+        if (outputFormat === "index") {
+            //     returnVal = this._massageText(returnVal, outputSpaceDelimiter);
+            //    returnVal = returnVal.replace(new RegExp(outputSpaceDelimiter, "g"), " "+outputSpaceDelimiter+" ");
+            returnVal = returnVal.replace(new RegExp(" ", "g"), ""); // s p a c e m a g i c
+        }
+        return returnVal;
+    }
+
+    static _convertIndex(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
+        let returnVal = "";
+        if (outputFormat === "index") {
+            return input;
+        }
+        input = this._massageText(input, inputSpaceDelimiter);
+        let indices = input.split(" ");
+        // input = input.replace(new RegExp(inputSpaceDelimiter, "g"), " "+inputSpaceDelimiter+" ");
+        // input = input.replace(new RegExp(" {2}", "g"), " ");
+        // let indices = input.split(/[.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/);
+        var self = this;
+        indices.forEach(function(entry) {
+            let lookup = self._lookup(entry, outputFormat);
+            if (entry === inputSpaceDelimiter || lookup === "29") {
+                returnVal += outputSpaceDelimiter;
+            } else if (lookup === "") {
+                returnVal += entry;
+            } else {
+                returnVal += lookup;
+            }
+            if (outputFormat === "index") {
+                returnVal += " ";
+            }
+        });
+        if (outputFormat === "index") {
+            //     returnVal = this._massageText(returnVal, outputSpaceDelimiter);
+            //    returnVal = returnVal.replace(new RegExp(outputSpaceDelimiter, "g"), " "+outputSpaceDelimiter+" ");
+            returnVal = returnVal.replace(new RegExp(" ", "g"), ""); // s p a c e m a g i c
+        }
+        return returnVal;
+    }
+
+    static _convertGematria(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
+        let returnVal = "";
+        if (outputFormat === "rune") {
+            return input;
+        }
+        for (let i = 0; i < input.length; i++) {
+            let lookup = this._lookup(input[i], outputFormat);
+            if (input[i] === inputSpaceDelimiter) returnVal += outputSpaceDelimiter;
+            else if (lookup === "") {
+                returnVal += input[i];
+            } else {
+                returnVal += lookup;
+            }
+            if (outputFormat === "index") {
+                returnVal += " ";
+            }
+        }
+        return returnVal;
+    }
+
+    static _massageText(input, spaceDelimiter) {
+        //       input = input.replace(new RegExp(spaceDelimiter, "g"), " "+spaceDelimiter+" ");
+        input = input.toUpperCase(); //convert to UPPERCASE
+
+        input = input.replace(/v/gi, "U"); //replace V with U
+        input = input.replace(/q/gi, "CU"); //replace Q with CU
+
+        input = input.replace(new RegExp(/[.\.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/, "g"), " $& ");
+        input = input.replace(new RegExp(" {2}", "g"), " ");
+
+        return input;
+
+    }
+
 
     static LPformat(token) {
         let formats = {
@@ -123,7 +249,7 @@ class Utils {
     }
 
     static LPoperation(token) {
-        let operations= {
+        let operations = {
             "Add": "_add",
             "Subtract": "_sub"
         };

@@ -6,7 +6,8 @@
 
 import Operation from "../Operation";
 import OperationError from "../errors/OperationError";
-
+import Utils from "../Utils";
+import TextTransliteration from "./TextTransliteration";
 /**
  * Add or Subtract Key operation
  */
@@ -25,18 +26,37 @@ class AddOrSubtractKey extends Operation {
         this.inputType = "string";
         this.outputType = "string";
         this.args = [
-            /* Example arguments. See the project wiki for full details.
-            {
-                name: "First arg",
-                type: "string",
-                value: "Don't Panic"
-            },
-            {
-                name: "Second arg",
-                type: "number",
-                value: 42
-            }
-            */
+          {
+              name: "Input Format",
+              type: "option", // the argument data type, see the next section for valid types
+              value: ["English", "Index", "Runic", "Prime"] // gematria primus
+          },
+          {
+              name:"Input Space Type",
+              type:"option",
+              value: ["SPACE", "DASH(-)", "PERIOD(.)", "COMMA", "none"]
+          },
+          {
+              name: "Output Format",
+              type: "option", // the argument data type, see the next section for valid types
+              value: ["English", "Index", "Runic", "Prime"] // gematria primus
+          },
+          {
+              name:"Out. Space Type",
+              type:"option",
+              value:  ["SPACE", "DASH(-)", "PERIOD(.)", "COMMA", "none"]
+          },
+          {
+              name: "Operation",
+              type: "option",
+              value: ["Add","Subtract"]
+          },
+          {
+              name: "Key",
+              type: "toggleString",
+              value: "",
+              toggleValues: ["English", "Index", "Runic", "Prime"] // gematria primus
+          }
         ];
     }
 
@@ -46,9 +66,108 @@ class AddOrSubtractKey extends Operation {
      * @returns {string}
      */
     run(input, args) {
-        // const [firstArg, secondArg] = args;
 
-        throw new OperationError("Test");
+              let inputFormat = Utils.LPformat(args[0]);
+              let inputSpaceDelimiter = Utils.spaceDelimiter(args[1]);
+
+              let outputFormat = Utils.LPformat(args[2]);
+              let outputSpaceDelimiter = Utils.spaceDelimiter(args[3]);
+
+              let operation = Utils.LPoperation(args[4]);
+
+              let keyFormat = Utils.LPformat(args[5].option);
+              let key = args[5].string;
+
+
+
+              /*
+              Convert everything to same language (index)
+              */
+              let outFormat = "index";
+              let formattedInput = "";
+              let formattedKey = "";
+              if (inputFormat=== "letter"){
+                  formattedInput = Utils._convertEnglish(input, outFormat, inputSpaceDelimiter, "-");
+              } else if (inputFormat === "rune"){
+                  formattedInput = Utils._convertGematria(input, outFormat, inputSpaceDelimiter, "-");
+              } else if (inputFormat === "index"){
+                  formattedInput = Utils._convertIndex(input, outFormat, inputSpaceDelimiter, "-");
+              }
+
+
+              if (keyFormat === "letter"){
+                  formattedKey = Utils._convertEnglish(key, outFormat, inputSpaceDelimiter, "-");
+              } else if (keyFormat === "rune"){
+                  formattedKey = Utils._convertGematria(key, outFormat, inputSpaceDelimiter, "-");
+              } else if (keyFormat === "index"){
+                  formattedKey = Utils._convertIndex(key, outFormat, inputSpaceDelimiter, "-");
+              }
+
+              /* Add key + index */
+              let returnValIndices = [];
+              if (formattedKey.length === 0){
+                  return "Enter a valid key";
+              }
+
+              formattedInput = Utils._massageText(formattedInput, "-");
+              formattedKey = Utils._massageText(formattedKey, "-");
+
+              formattedInput = formattedInput.split(" ");
+              formattedKey = formattedKey.split(" ");
+              for (let i = 0; i < formattedInput.length; i){
+                  if (formattedInput[i] === "-"){
+                      returnValIndices.push("-");
+                      i++;
+                      continue;
+                  }
+                  for (let j = 0; j < formattedKey.length; j++){
+                      if (i >= formattedInput.length){
+                          break;
+                      } else {
+                          let keyIndex = formattedKey[j];
+                          let validKeyIndex = !isNaN(parseFloat(keyIndex)) && isFinite(keyIndex);
+
+                          let inputIndex = formattedInput[i];
+                          let validInputIndex = Utils._isValid(formattedInput[i]);
+
+                          if (formattedInput[i] === "-" || formattedInput[i] === "29"){
+                              returnValIndices.push("-");
+                              i++;
+                              j--;
+                              continue;
+                          }
+
+                          if (validInputIndex === false){
+                              returnValIndices.push(formattedInput[i]);
+                              i++;
+                              j--; // keep key in place
+                              continue;
+                          }
+
+                          if (validKeyIndex === false){
+                              continue; //if we hit punctuation, continue without advancing key.  If you'd like to advance key on input, change this.
+                          }
+
+                          let indexTotal = 0;
+                          if (operation === "_add"){
+                              indexTotal = Utils._add(parseInt(inputIndex), parseInt(keyIndex));
+                          } else {
+                              indexTotal = Utils._sub(parseInt(inputIndex), parseInt(keyIndex));
+                          }
+                          let modIndex = Utils._mod(indexTotal, 29);
+                          returnValIndices.push(modIndex);
+                          i++;
+                      }
+                  }
+
+              }
+
+              returnValIndices = returnValIndices.join(" ");
+              let returnVal = returnValIndices;
+              if (outputFormat!=="index"){
+                  returnVal = Utils._convertIndex(returnValIndices, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
+              }
+              return returnVal;
     }
 
     /**

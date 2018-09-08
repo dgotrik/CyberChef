@@ -15,7 +15,7 @@ import Gematria from "../config/Gematria.json";
 class TextTransliteration extends Operation {
 
     /**
-     * TextTranslation constructor
+     * TextTransliteration constructor
      */
 
     constructor() {
@@ -50,112 +50,6 @@ class TextTransliteration extends Operation {
         ];
     }
 
-        _convertPrime(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
-            let returnVal = "";
-            if (outputFormat === "prime") {
-                return input;
-            }
-            input = Utils._massageText(input, inputSpaceDelimiter);
-            let indices = input.split(" ");
-            // input = input.replace(new RegExp(inputSpaceDelimiter, "g"), " "+inputSpaceDelimiter+" ");
-            // input = input.replace(new RegExp(" {2}", "g"), " ");
-            // let indices = input.split(/[.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/);
-            indices.forEach(function(entry) {
-                let lookup = Utils._lookup(entry, outputFormat);
-                if (entry === inputSpaceDelimiter || lookup === "29") {
-                    returnVal += outputSpaceDelimiter;
-                } else if (lookup === "") {
-                    returnVal += entry;
-                } else {
-                    returnVal += lookup;
-                }
-                if (outputFormat === "index") {
-                    returnVal += " ";
-                }
-            });
-            if (outputFormat === "index") {
-                //     returnVal = this._massageText(returnVal, outputSpaceDelimiter);
-                //    returnVal = returnVal.replace(new RegExp(outputSpaceDelimiter, "g"), " "+outputSpaceDelimiter+" ");
-                returnVal = returnVal.replace(new RegExp(" ", "g"), ""); // s p a c e m a g i c
-            }
-            return returnVal;
-        }
-
-    _convertIndex(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
-        let returnVal = "";
-        if (outputFormat === "index") {
-            return input;
-        }
-        input = Utils._massageText(input, inputSpaceDelimiter);
-        let indices = input.split(" ");
-        // input = input.replace(new RegExp(inputSpaceDelimiter, "g"), " "+inputSpaceDelimiter+" ");
-        // input = input.replace(new RegExp(" {2}", "g"), " ");
-        // let indices = input.split(/[.,\/ -\"\n\r\t;:<>\?\\\'\[\]\{\}]/);
-        indices.forEach(function(entry) {
-            let lookup = Utils._lookup(entry, outputFormat);
-            if (entry === inputSpaceDelimiter || lookup === "29") {
-                returnVal += outputSpaceDelimiter;
-            } else if (lookup === "") {
-                returnVal += entry;
-            } else {
-                returnVal += lookup;
-            }
-            if (outputFormat === "index") {
-                returnVal += " ";
-            }
-        });
-        if (outputFormat === "index") {
-            //     returnVal = this._massageText(returnVal, outputSpaceDelimiter);
-            //    returnVal = returnVal.replace(new RegExp(outputSpaceDelimiter, "g"), " "+outputSpaceDelimiter+" ");
-            returnVal = returnVal.replace(new RegExp(" ", "g"), ""); // s p a c e m a g i c
-        }
-        return returnVal;
-    }
-
-    _convertGematria(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
-        let returnVal = "";
-        if (outputFormat === "rune") {
-            return input;
-        }
-        for (let i = 0; i < input.length; i++) {
-            let lookup = Utils._lookup(input[i], outputFormat);
-            if (input[i] === inputSpaceDelimiter) returnVal += outputSpaceDelimiter;
-            else if (lookup === "") {
-                returnVal += input[i];
-            } else {
-                returnVal += lookup;
-            }
-            if (outputFormat === "index") {
-                returnVal += " ";
-            }
-        }
-        return returnVal;
-    }
-
-    _convertEnglish(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter) {
-        let returnVal = "";
-        input = Utils._massageText(input, inputSpaceDelimiter);
-        let words = input.split(inputSpaceDelimiter);
-        let outputWords = [];
-        words.forEach(function(word) {
-            if (word !== "") {
-                outputWords.push(Utils._parseEnglishWord(word, outputFormat));
-            }
-        });
-
-        returnVal = outputWords.join(outputSpaceDelimiter);
-        if (outputFormat === "index") { //format the numbers correctly
-            // returnVal = this._massageText(returnVal, outputSpaceDelimiter);;
-            returnVal = returnVal.replace(new RegExp(outputSpaceDelimiter, "g"), " " + outputSpaceDelimiter + " ");
-            returnVal = returnVal.replace(new RegExp(" {2}", "g"), " "); //replace double spaces with single
-        }
-        return returnVal;
-    }
-
-
-
-
-
 
     /**
      * @param {string} input
@@ -178,13 +72,13 @@ class TextTransliteration extends Operation {
             return "Please use DASH(-) space delimiters when outputting indices";
         }
         if (inputFormat === "letter") {
-            returnVal = this._convertEnglish(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
+            returnVal = Utils._convertEnglish(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
         } else if (inputFormat === "rune") {
-            returnVal = this._convertGematria(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
+            returnVal = Utils._convertGematria(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
         } else if (inputFormat === "index") {
-            returnVal = this._convertIndex(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
+            returnVal = Utils._convertIndex(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
         } else if (inputFormat === "prime") {
-            returnVal = this._convertPrime(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
+            returnVal = Utils._convertPrime(input, outputFormat, inputSpaceDelimiter, outputSpaceDelimiter);
         }
         return returnVal;
     }
