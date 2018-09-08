@@ -2,6 +2,14 @@
     {
         "name": "Favourites",
         "ops": []
+    },    {
+        "name": "Liber Primus",
+        "ops":[
+            "Gematria Sum",
+            "Add or Subtract Key",
+            "English Text To Gematria Sum",
+            "Frequency Analysis"
+        ]
     },
     {
         "name": "Data format",
