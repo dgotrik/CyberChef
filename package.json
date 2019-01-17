@@ -73,9 +73,14 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
+    "@babel/plugin-transform-strict-mode": "^7.0.0",
     "arrive": "^2.4.1",
     "babel-plugin-transform-builtin-extend": "1.1.2",
     "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "bcryptjs": "^2.4.3",
     "bignumber.js": "^7.2.1",
     "bootstrap-colorpicker": "^2.5.3",
@@ -92,6 +97,7 @@
     "esprima": "^4.0.1",
     "exif-parser": "^0.1.12",
     "file-saver": "^1.3.8",
+    "grunt-cli": "^1.3.1",
     "highlight.js": "^9.12.0",
     "jquery": "^3.3.1",
     "js-crc": "^0.2.0",
