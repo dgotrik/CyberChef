@@ -4,7 +4,7 @@
 * Imports all modules for builds which do not load modules separately.
 *
 * @author n1474335 [n1474335@gmail.com]
-* @copyright Crown Copyright 2018
+* @copyright Crown Copyright 2019
 * @license Apache-2.0
 */
 import DefaultModule from "./Default";
