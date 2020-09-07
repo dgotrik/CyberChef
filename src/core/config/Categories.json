@@ -33,6 +33,8 @@
             "From Base32",
             "To Base58",
             "From Base58",
+            "To Base62",
+            "From Base62",
             "To Base85",
             "From Base85",
             "To Base",
@@ -45,6 +47,7 @@
             "URL Decode",
             "Escape Unicode Characters",
             "Unescape Unicode Characters",
+            "Normalise Unicode",
             "To Quoted Printable",
             "From Quoted Printable",
             "To Punycode",
@@ -57,11 +60,16 @@
             "Change IP format",
             "Encode text",
             "Decode text",
+            "Text Encoding Brute Force",
             "Swap endianness",
             "To MessagePack",
             "From MessagePack",
             "To Braille",
-            "From Braille"
+            "From Braille",
+            "Parse TLV",
+            "CSV to JSON",
+            "JSON to CSV",
+            "Avro to JSON"
         ]
     },
     {
@@ -87,11 +95,19 @@
             "Vigenère Decode",
             "To Morse Code",
             "From Morse Code",
+            "Bacon Cipher Encode",
+            "Bacon Cipher Decode",
             "Bifid Cipher Encode",
             "Bifid Cipher Decode",
             "Affine Cipher Encode",
             "Affine Cipher Decode",
+            "A1Z26 Cipher Encode",
+            "A1Z26 Cipher Decode",
+            "Rail Fence Cipher Encode",
+            "Rail Fence Cipher Decode",
             "Atbash Cipher",
+            "CipherSaber2 Encrypt",
+            "CipherSaber2 Decrypt",
             "Substitute",
             "Derive PBKDF2 key",
             "Derive EVP key",
@@ -100,7 +116,15 @@
             "JWT Sign",
             "JWT Verify",
             "JWT Decode",
-            "Pseudo-Random Number Generator"
+            "Citrix CTX1 Encode",
+            "Citrix CTX1 Decode",
+            "Pseudo-Random Number Generator",
+            "Enigma",
+            "Bombe",
+            "Multiple Bombe",
+            "Typex",
+            "Lorenz",
+            "Colossus"
         ]
     },
     {
@@ -115,8 +139,10 @@
             "Generate PGP Key Pair",
             "PGP Encrypt",
             "PGP Decrypt",
+            "PGP Verify",
             "PGP Encrypt and Sign",
-            "PGP Decrypt and Verify"
+            "PGP Decrypt and Verify",
+            "Parse SSH Host Key"
         ]
     },
     {
@@ -153,20 +179,28 @@
         "name": "Networking",
         "ops": [
             "HTTP request",
+            "DNS over HTTPS",
             "Strip HTTP headers",
             "Dechunk HTTP response",
             "Parse User Agent",
             "Parse IP range",
             "Parse IPv6 address",
             "Parse IPv4 header",
+            "Parse UDP",
+            "Parse SSH Host Key",
             "Parse URI",
             "URL Encode",
             "URL Decode",
+            "Protobuf Decode",
+            "VarInt Encode",
+            "VarInt Decode",
             "Format MAC addresses",
             "Change IP format",
             "Group IP addresses",
             "Encode NetBIOS Name",
-            "Decode NetBIOS Name"
+            "Decode NetBIOS Name",
+            "Defang URL",
+            "Defang IP Addresses"
         ]
     },
     {
@@ -174,7 +208,9 @@
         "ops": [
             "Encode text",
             "Decode text",
-            "Unescape Unicode Characters"
+            "Remove Diacritics",
+            "Unescape Unicode Characters",
+            "Convert to NATO alphabet"
         ]
     },
     {
@@ -185,6 +221,8 @@
             "Remove null bytes",
             "To Upper case",
             "To Lower case",
+            "To Case Insensitive Regex",
+            "From Case Insensitive Regex",
             "Add line numbers",
             "Remove line numbers",
             "To Table",
@@ -209,7 +247,10 @@
             "Convert mass",
             "Convert speed",
             "Convert data units",
+            "Convert co-ordinate format",
+            "Show on map",
             "Parse UNIX file permissions",
+            "Parse ObjectID timestamp",
             "Swap endianness",
             "Parse colour code",
             "Escape string",
@@ -246,7 +287,8 @@
             "XPath expression",
             "JPath expression",
             "CSS selector",
-            "Extract EXIF"
+            "Extract EXIF",
+            "Extract Files"
         ]
     },
     {
@@ -261,6 +303,7 @@
             "Zip",
             "Unzip",
             "Bzip2 Decompress",
+            "Bzip2 Compress",
             "Tar",
             "Untar"
         ]
@@ -284,6 +327,10 @@
             "HAS-160",
             "Whirlpool",
             "Snefru",
+            "BLAKE2b",
+            "BLAKE2s",
+            "GOST hash",
+            "Streebog",
             "SSDEEP",
             "CTPH",
             "Compare SSDEEP hashes",
@@ -298,11 +345,11 @@
             "Fletcher-32 Checksum",
             "Fletcher-64 Checksum",
             "Adler-32 Checksum",
+            "Luhn Checksum",
+            "CRC-8 Checksum",
             "CRC-16 Checksum",
             "CRC-32 Checksum",
-            "TCP/IP Checksum",
-            "To Geohash",
-            "From Geohash"
+            "TCP/IP Checksum"
         ]
     },
     {
@@ -334,7 +381,56 @@
             "BSON serialise",
             "BSON deserialise",
             "To MessagePack",
-            "From MessagePack"
+            "From MessagePack",
+            "Render Markdown"
+        ]
+    },
+    {
+        "name": "Forensics",
+        "ops": [
+            "Detect File Type",
+            "Scan for Embedded Files",
+            "Extract Files",
+            "YARA Rules",
+            "Remove EXIF",
+            "Extract EXIF",
+            "Extract RGBA",
+            "View Bit Plane",
+            "Randomize Colour Palette",
+            "Extract LSB"
+        ]
+    },
+    {
+        "name": "Multimedia",
+        "ops": [
+            "Render Image",
+            "Play Media",
+            "Generate Image",
+            "Optical Character Recognition",
+            "Remove EXIF",
+            "Extract EXIF",
+            "Split Colour Channels",
+            "Rotate Image",
+            "Resize Image",
+            "Blur Image",
+            "Dither Image",
+            "Invert Image",
+            "Flip Image",
+            "Crop Image",
+            "Image Brightness / Contrast",
+            "Image Opacity",
+            "Image Filter",
+            "Contain Image",
+            "Cover Image",
+            "Image Hue/Saturation/Lightness",
+            "Sharpen Image",
+            "Normalise Image",
+            "Convert Image Format",
+            "Add Text To Image",
+            "Hex Density chart",
+            "Scatter chart",
+            "Series chart",
+            "Heatmap chart"
         ]
     },
     {
@@ -342,18 +438,18 @@
         "ops": [
             "Entropy",
             "Frequency distribution",
+            "Index of Coincidence",
             "Chi Square",
-            "Detect File Type",
-            "Scan for Embedded Files",
             "Disassemble x86",
             "Pseudo-Random Number Generator",
             "Generate UUID",
             "Generate TOTP",
             "Generate HOTP",
+            "Generate QR Code",
+            "Parse QR Code",
             "Haversine distance",
-            "Render Image",
-            "Remove EXIF",
-            "Extract EXIF",
+            "HTML To Text",
+            "Generate Lorem Ipsum",
             "Numberwang",
             "XKCD Random Number"
         ]
@@ -363,6 +459,7 @@
         "ops": [
             "Magic",
             "Fork",
+            "Subsection",
             "Merge",
             "Register",
             "Label",
