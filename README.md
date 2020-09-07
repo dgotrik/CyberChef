@@ -12,7 +12,8 @@
 CyberChef is a simple, intuitive web app for carrying out all manner of "cyber" operations within a web browser. These operations include simple encoding like XOR or Base64, more complex encryption like AES, DES and Blowfish, creating binary and hexdumps, compression and decompression of data, calculating hashes and checksums, IPv6 and X.509 parsing, changing character encodings, and much more.
 
 The tool is designed to enable both technical and non-technical analysts to manipulate data in complex ways without having to deal with complex tools or algorithms. It was conceived, designed, built and incrementally improved by an analyst in their 10% innovation time over several years.
-
+## Cicada 3301 Tools
+This fork of CyberChef has additional functionality to view the pages of the Liber Primus, load the transcribed text of the Liber Primus, perform transliteration between English/Runic/"Index"(F=0, U=1, TH=2, etc), and perform some cipher operations and view the results.   
 ## Live demo
 
 CyberChef is still under active development. As a result, it shouldn't be considered a finished product. There is still testing and bug fixing to do, new features to be added and additional documentation to write. Please contribute!
